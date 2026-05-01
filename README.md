@@ -147,17 +147,6 @@ For **Claude Code CLI**, **Cursor**, **Continue** — same config shape, differe
 
 ---
 
-## What it doesn't do (yet)
-
-- **HTTP/2 wire format** — the wrapper sends HTTP/1.1; Burp Repeater/Intruder upgrades to HTTP/2 on send if the target supports it. If you need raw HTTP/2 frame control, fall back to upstream `mcp__burp__send_http2_request`.
-- **Scanner / Active Scan triggering** — exposed by the upstream MCP but not yet wrapped here.
-- **Project options / session rules / scope edits** — same.
-- **WebSocket history** — only HTTP for now.
-
-PRs welcome for any of the above.
-
----
-
 ## The bundled Burp extension
 
 `burp-extension/deduped_history.py` is a Jython extension I wrote (and fixed — see `CHANGELOG`-equivalent notes below) that produces the dedup/JS exports the wrapper indexes.
