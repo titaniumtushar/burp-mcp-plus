@@ -1,0 +1,26 @@
+{
+  "_comment": "Add this entry under mcpServers in your Claude Desktop config file. Path on macOS: ~/Library/Application Support/Claude/claude_desktop_config.json. Adjust the --directory path to where you cloned this repo, and uv path to wherever your uv binary lives (e.g. /opt/homebrew/bin/uv on macOS, ~/.local/bin/uv on Linux).",
+  "mcpServers": {
+    "burp": {
+      "command": "/path/to/burp-suite-jdk/bin/java",
+      "args": [
+        "-jar",
+        "/path/to/.BurpSuite/mcp-proxy/mcp-proxy-all.jar",
+        "--sse-url",
+        "http://127.0.0.1:9876"
+      ]
+    },
+    "burp-plus": {
+      "command": "/opt/homebrew/bin/uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/burp-mcp-plus",
+        "burp-mcp-plus"
+      ],
+      "env": {
+        "BURP_MCP_URL": "http://127.0.0.1:9876/"
+      }
+    }
+  }
+}

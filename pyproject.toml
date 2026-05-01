@@ -1,0 +1,61 @@
+[project]
+name = "burp-mcp-plus"
+version = "0.1.0"
+description = "An MCP wrapper for Burp Suite that builds complete, well-structured HTTP requests and ingests dedup/JS exports for token-efficient pentesting."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+keywords = [
+    "mcp",
+    "burp",
+    "burp-suite",
+    "pentest",
+    "bug-bounty",
+    "security",
+    "claude",
+    "anthropic",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries",
+    "Operating System :: OS Independent",
+]
+authors = [
+    { name = "Titanium Tushar", email = "54720076+titaniumtushar@users.noreply.github.com" },
+]
+dependencies = [
+    "mcp>=1.2.0",
+    "httpx>=0.27.0",
+    "anyio>=4.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.urls]
+Homepage = "https://github.com/titaniumtushar/burp-mcp-plus"
+Repository = "https://github.com/titaniumtushar/burp-mcp-plus"
+Issues = "https://github.com/titaniumtushar/burp-mcp-plus/issues"
+
+[project.scripts]
+burp-mcp-plus = "burp_mcp_plus.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/burp_mcp_plus"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

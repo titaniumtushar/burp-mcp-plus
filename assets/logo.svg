@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 220" role="img" aria-label="burp-mcp-plus">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff6a00"/>
+      <stop offset="100%" stop-color="#ff8e3c"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="100%" stop-color="#7dffd0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="220" fill="url(#bg)" rx="16"/>
+
+  <!-- bracket left -->
+  <path d="M 60 50 L 30 50 L 30 170 L 60 170"
+        fill="none" stroke="url(#orange)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- bracket right -->
+  <path d="M 740 50 L 770 50 L 770 170 L 740 170"
+        fill="none" stroke="url(#orange)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Title -->
+  <text x="400" y="100" text-anchor="middle"
+        font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="56" font-weight="700" fill="#f0f6fc" filter="url(#glow)">
+    burp-mcp<tspan fill="url(#orange)">-plus</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="400" y="138" text-anchor="middle"
+        font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="16" fill="#8b949e">
+    structured HTTP for AI-assisted Burp · token-thrifty pentest tooling
+  </text>
+
+  <!-- Pipeline -->
+  <g transform="translate(0,170)">
+    <text x="200" y="20" text-anchor="middle"
+          font-family="ui-monospace, monospace" font-size="14" fill="#7dffd0">LLM</text>
+    <text x="400" y="20" text-anchor="middle"
+          font-family="ui-monospace, monospace" font-size="14" fill="url(#orange)">burp-mcp-plus</text>
+    <text x="600" y="20" text-anchor="middle"
+          font-family="ui-monospace, monospace" font-size="14" fill="#00d4ff">Burp Suite</text>
+
+    <line x1="240" y1="15" x2="335" y2="15" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <polygon points="335,15 328,11 328,19" fill="#30363d"/>
+
+    <line x1="475" y1="15" x2="560" y2="15" stroke="#30363d" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <polygon points="560,15 553,11 553,19" fill="#30363d"/>
+  </g>
+</svg>
