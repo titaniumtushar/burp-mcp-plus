@@ -102,7 +102,14 @@ If you want the dedup/JS ingestion features, install the bundled extension:
 
 1. Set up Jython 2.7 in Burp → Settings → Extensions → Python environment.
 2. Burp → Extensions → Installed → Add → Python → `burp-extension/deduped_history.py` from this repo.
-3. Two new tabs appear: **Deduped History** and **JS Exporter**. Browse a target, then export.
+3. Two new tabs appear: **Deduped History** and **JS Exporter**.
+
+**Before you start capturing, two things the extension needs:**
+
+- **Set your target scope.** Burp → Target → Scope → add the host(s) you're testing (e.g. `https://app.acme.com/.*`). The extension only dedupes/exports in-scope traffic, so this keeps the output clean and avoids ingesting random third-party noise (CDNs, analytics, etc.).
+- **Pick an output directory for the JS Exporter.** In the **JS Exporter** tab, set the output dir + project name before browsing. Files land at `<output_dir>/<project>/<host>/<flattened-path>/<file>.js` along with a `_manifest.csv` that the wrapper indexes.
+
+Then browse the target. The Deduped History tab fills as new endpoints appear; the JS Exporter tab fills as new `.js` / `.mjs` responses come through. Hit **Export** in the Deduped History tab to write `deduped_requests.txt`.
 
 ### 2. Wrapper side
 
