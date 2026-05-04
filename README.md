@@ -166,7 +166,31 @@ claude mcp add burp --scope user -- \
 
 Verify with `claude mcp list`. Tools appear in any Claude Code session as `mcp__burp-plus__*` and `mcp__burp__*`. Use `--scope project` if you want it scoped to the current repo only (writes to `.mcp.json`), or `--scope local` for just-this-machine config.
 
-**Cursor / Continue / other MCP hosts** — point them at a stdio MCP server with `command: uv` and `args: ["run", "--directory", "/path/to/burp-mcp-plus", "burp-mcp-plus"]`. The wrapper itself doesn't care which host launches it.
+**Cursor** uses a JSON file like Claude Desktop, but at a different path. Edit `~/.cursor/mcp.json` (global, available in every workspace) — create the file if it doesn't exist:
+
+```json
+{
+  "mcpServers": {
+    "burp": {
+      "command": "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java",
+      "args": [
+        "-jar", "/Users/YOU/.BurpSuite/mcp-proxy/mcp-proxy-all.jar",
+        "--sse-url", "http://127.0.0.1:9876"
+      ]
+    },
+    "burp-plus": {
+      "command": "/opt/homebrew/bin/uv",
+      "args": [
+        "run", "--directory", "/path/to/burp-mcp-plus", "burp-mcp-plus"
+      ]
+    }
+  }
+}
+```
+
+Then: Cursor → **Settings** (`⌘,`) → **MCP** → toggle both servers on. The status dot should go green; if it stays red, click **View logs** to see why. Use `.cursor/mcp.json` in a workspace root instead of `~/.cursor/mcp.json` if you want it scoped to one project.
+
+**Continue / Cline / other stdio MCP hosts** — same JSON shape, host-specific config path. The wrapper itself doesn't care which host launches it; all it needs is a stdio pipe.
 
 ---
 
