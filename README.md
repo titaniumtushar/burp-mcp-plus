@@ -124,22 +124,37 @@ uv run pytest                  # offline tests; no Burp required
 
 ### 3. Wire it into your MCP host
 
-**Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+The configs below use four placeholders. Fill them in for your OS — quick reference at the bottom of this section.
+
+| Placeholder | What it is |
+| ----------- | ---------- |
+| `<BURP_JAVA>` | Path to the `java` binary that ships inside Burp Suite |
+| `<BURP_MCP_JAR>` | Path to `mcp-proxy-all.jar` (downloaded by the BApp Store extension) |
+| `<REPO_DIR>` | Where you cloned this repo |
+| `<UV>` | `"uv"` if it's on your PATH; otherwise the absolute path to the `uv` binary |
+
+#### Claude Desktop
+
+Edit your Claude Desktop config file:
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux** *(unofficial builds only — Claude Desktop isn't officially distributed for Linux)*: `~/.config/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "burp": {
-      "command": "/path/to/burp-suite-jdk/bin/java",
+      "command": "<BURP_JAVA>",
       "args": [
-        "-jar", "/path/to/.BurpSuite/mcp-proxy/mcp-proxy-all.jar",
+        "-jar", "<BURP_MCP_JAR>",
         "--sse-url", "http://127.0.0.1:9876"
       ]
     },
     "burp-plus": {
-      "command": "/opt/homebrew/bin/uv",
+      "command": "<UV>",
       "args": [
-        "run", "--directory", "/path/to/burp-mcp-plus", "burp-mcp-plus"
+        "run", "--directory", "<REPO_DIR>", "burp-mcp-plus"
       ]
     }
   }
@@ -150,47 +165,88 @@ uv run pytest                  # offline tests; no Burp required
 
 Restart the host. Tools appear as `mcp__burp-plus__*`.
 
-**Claude Code CLI** uses a CLI command instead of a JSON file. From the repo directory:
+#### Claude Code CLI
+
+Run from the repo directory (uses `$PWD` as `<REPO_DIR>`):
 
 ```bash
 # Add the wrapper (user scope = available in every project)
 claude mcp add burp-plus --scope user -- \
-  /opt/homebrew/bin/uv run --directory "$(pwd)" burp-mcp-plus
+  uv run --directory "$PWD" burp-mcp-plus
 
-# Add the upstream Burp MCP too (adjust java + jar paths to your install)
+# Add the upstream Burp MCP too — substitute your <BURP_JAVA> and <BURP_MCP_JAR>
 claude mcp add burp --scope user -- \
-  "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" \
-  -jar "$HOME/.BurpSuite/mcp-proxy/mcp-proxy-all.jar" \
-  --sse-url http://127.0.0.1:9876
+  <BURP_JAVA> -jar <BURP_MCP_JAR> --sse-url http://127.0.0.1:9876
 ```
+
+On Windows PowerShell, replace `$PWD` with `(Get-Location).Path`. On `cmd.exe`, replace it with `%CD%`.
 
 Verify with `claude mcp list`. Tools appear in any Claude Code session as `mcp__burp-plus__*` and `mcp__burp__*`. Use `--scope project` if you want it scoped to the current repo only (writes to `.mcp.json`), or `--scope local` for just-this-machine config.
 
-**Cursor** uses a JSON file like Claude Desktop, but at a different path. Edit `~/.cursor/mcp.json` (global, available in every workspace) — create the file if it doesn't exist:
+#### Cursor
+
+Edit `~/.cursor/mcp.json` (global, available in every workspace) — same path on macOS / Linux / Windows (Cursor maps `~` to your home dir on every OS). Create the file if it doesn't exist:
 
 ```json
 {
   "mcpServers": {
     "burp": {
-      "command": "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java",
+      "command": "<BURP_JAVA>",
       "args": [
-        "-jar", "/Users/YOU/.BurpSuite/mcp-proxy/mcp-proxy-all.jar",
+        "-jar", "<BURP_MCP_JAR>",
         "--sse-url", "http://127.0.0.1:9876"
       ]
     },
     "burp-plus": {
-      "command": "/opt/homebrew/bin/uv",
+      "command": "<UV>",
       "args": [
-        "run", "--directory", "/path/to/burp-mcp-plus", "burp-mcp-plus"
+        "run", "--directory", "<REPO_DIR>", "burp-mcp-plus"
       ]
     }
   }
 }
 ```
 
-Then: Cursor → **Settings** (`⌘,`) → **MCP** → toggle both servers on. The status dot should go green; if it stays red, click **View logs** to see why. Use `.cursor/mcp.json` in a workspace root instead of `~/.cursor/mcp.json` if you want it scoped to one project.
+Then: Cursor → **Settings** → **MCP** → toggle both servers on. The status dot should go green; if it stays red, click **View logs** in the same panel to see why. Use `.cursor/mcp.json` in a workspace root instead of `~/.cursor/mcp.json` if you want it scoped to one project.
 
-**Continue / Cline / other stdio MCP hosts** — same JSON shape, host-specific config path. The wrapper itself doesn't care which host launches it; all it needs is a stdio pipe.
+#### Continue / Cline / other stdio MCP hosts
+
+Same JSON shape, host-specific config path. The wrapper itself doesn't care which host launches it — all it needs is a stdio pipe.
+
+---
+
+#### Where the placeholders live on each OS
+
+**`<BURP_JAVA>`** — the JRE bundled inside Burp:
+
+| OS | Typical path |
+| -- | ------------ |
+| macOS | `/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java` |
+| Linux | `~/BurpSuitePro/jre/bin/java` *(or wherever you extracted Burp's installer)* |
+| Windows | `C:\Users\<you>\AppData\Local\Programs\BurpSuitePro\jre\bin\java.exe` |
+
+**`<BURP_MCP_JAR>`** — downloaded by Burp's BApp Store when you install the MCP Server extension:
+
+| OS | Typical path |
+| -- | ------------ |
+| macOS / Linux | `~/.BurpSuite/bapps/<extension-id>/burp-mcp-all.jar` *(or `~/.BurpSuite/mcp-proxy/mcp-proxy-all.jar` depending on Burp version)* |
+| Windows | `C:\Users\<you>\AppData\Roaming\BurpSuite\bapps\<extension-id>\burp-mcp-all.jar` |
+
+To find the exact path on your machine: `find ~/.BurpSuite -name "*.jar"` (macOS / Linux) or look in `%APPDATA%\BurpSuite\bapps\` (Windows).
+
+**`<REPO_DIR>`** — wherever you ran `git clone`. Get it with `pwd` (POSIX shells) or `cd` (Windows `cmd`).
+
+**`<UV>`** — most users can just use `"uv"` (the literal string) and let the system PATH resolve it. If your MCP host can't find `uv` that way, use the absolute path:
+
+| Install method | Typical path |
+| -------------- | ------------ |
+| macOS Homebrew (Apple Silicon) | `/opt/homebrew/bin/uv` |
+| macOS Homebrew (Intel) | `/usr/local/bin/uv` |
+| Linux / `curl` install | `~/.local/bin/uv` |
+| Windows | `%USERPROFILE%\.local\bin\uv.exe` |
+| `pipx install uv` (any OS) | check `pipx environment` |
+
+To find it: `which uv` (POSIX) or `where uv` (Windows).
 
 ---
 
