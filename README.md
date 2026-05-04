@@ -252,13 +252,11 @@ To find it: `which uv` (POSIX) or `where uv` (Windows).
 
 ## The bundled Burp extension
 
-`burp-extension/deduped_history.py` is a Jython extension I wrote (and fixed — see `CHANGELOG`-equivalent notes below) that produces the dedup/JS exports the wrapper indexes.
+`burp-extension/deduped_history.py` is a Jython extension that produces the dedup/JS exports the wrapper indexes.
 
 **Tab 1: Deduped History.** Watches proxy traffic. Adds a row only when a new (method, host, path, parameters) tuple appears. Re-fires when new query/body parameter names show up on an endpoint. Export the whole thing to `deduped_requests.txt`.
 
 **Tab 2: JS Exporter.** Watches for JavaScript responses, saves each unique JS file to `<output>/<project>/<host>/<flattened-path>/<name>.js`, writes a `_manifest.csv`. Detects version strings from filenames and content hashes.
-
-**Bug fix included:** Older versions wrote JS files as Python `array('b', [10, 10, ...])` literals instead of raw bytes (Jython slice-of-byte-array gotcha). The version in this repo writes proper bytes. The wrapper transparently decodes the old format too, so legacy exports keep working.
 
 ---
 
