@@ -150,7 +150,23 @@ uv run pytest                  # offline tests; no Burp required
 
 Restart the host. Tools appear as `mcp__burp-plus__*`.
 
-For **Claude Code CLI**, **Cursor**, **Continue** — same config shape, different config file. The MCP server itself doesn't care.
+**Claude Code CLI** uses a CLI command instead of a JSON file. From the repo directory:
+
+```bash
+# Add the wrapper (user scope = available in every project)
+claude mcp add burp-plus --scope user -- \
+  /opt/homebrew/bin/uv run --directory "$(pwd)" burp-mcp-plus
+
+# Add the upstream Burp MCP too (adjust java + jar paths to your install)
+claude mcp add burp --scope user -- \
+  "/Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/bin/java" \
+  -jar "$HOME/.BurpSuite/mcp-proxy/mcp-proxy-all.jar" \
+  --sse-url http://127.0.0.1:9876
+```
+
+Verify with `claude mcp list`. Tools appear in any Claude Code session as `mcp__burp-plus__*` and `mcp__burp__*`. Use `--scope project` if you want it scoped to the current repo only (writes to `.mcp.json`), or `--scope local` for just-this-machine config.
+
+**Cursor / Continue / other MCP hosts** — point them at a stdio MCP server with `command: uv` and `args: ["run", "--directory", "/path/to/burp-mcp-plus", "burp-mcp-plus"]`. The wrapper itself doesn't care which host launches it.
 
 ---
 
