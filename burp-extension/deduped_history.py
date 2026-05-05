@@ -540,31 +540,45 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab):
                 s = self.helpers.bytesToString(burp_bytes)
                 return s.encode("utf-8", errors="replace")
 
+        # Accept str (bytes) OR unicode and always emit valid utf-8 bytes.
+        # Without this, Jython 2.7 silently tries ASCII when a str template
+        # is fed unicode args (or vice versa) — boom on the first byte >= 0x80.
         def _txt(s):
+            if isinstance(s, bytes):
+                s = s.decode("utf-8", errors="replace")
             return s.encode("utf-8", errors="replace")
+
+        # Coerce anything (Java String, Jython str, unicode, int) to unicode
+        # so `.format()` calls below don't trigger implicit ASCII coercion.
+        def _u(x):
+            if isinstance(x, unicode):
+                return x
+            if isinstance(x, bytes):
+                return x.decode("utf-8", errors="replace")
+            return unicode(x)
 
         try:
             with open(filepath, "wb") as fh:
                 fh.write(_txt(
-                    "# Deduped HTTP History Export\n"
-                    "# Total unique requests: {}\n"
-                    "#\n"
-                    "# Each block contains:\n"
-                    "#   -- REQUEST --   raw HTTP request\n"
-                    "#   -- RESPONSE --  raw HTTP response (headers + body)\n"
-                    "#\n\n".format(len(snapshot))
+                    u"# Deduped HTTP History Export\n"
+                    u"# Total unique requests: {}\n"
+                    u"#\n"
+                    u"# Each block contains:\n"
+                    u"#   -- REQUEST --   raw HTTP request\n"
+                    u"#   -- RESPONSE --  raw HTTP response (headers + body)\n"
+                    u"#\n\n".format(len(snapshot))
                 ))
 
                 for idx, (row, mi) in enumerate(snapshot, 1):
-                    thick = _txt("=" * 72 + "\n")
-                    thin  = _txt("-" * 72 + "\n")
+                    thick = _txt(u"=" * 72 + u"\n")
+                    thin  = _txt(u"-" * 72 + u"\n")
 
                     fh.write(thick)
-                    fh.write(_txt("# [{:04d}]  {} https://{}{}\n".format(
-                        idx, row["method"], row["host"], row["path"])))
-                    fh.write(_txt("#  Parameters : {}\n".format(row["params"])))
-                    fh.write(_txt("#  Status     : {}   Length: {}\n".format(
-                        row["status"], row["length"])))
+                    fh.write(_txt(u"# [{:04d}]  {} https://{}{}\n".format(
+                        idx, _u(row["method"]), _u(row["host"]), _u(row["path"]))))
+                    fh.write(_txt(u"#  Parameters : {}\n".format(_u(row["params"]))))
+                    fh.write(_txt(u"#  Status     : {}   Length: {}\n".format(
+                        _u(row["status"]), _u(row["length"]))))
                     fh.write(thick)
 
                     fh.write(_txt("-- REQUEST --\n"))
@@ -892,6 +906,24 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab):
 
     def _writeManifest(self, output_dir, project):
         """Write/overwrite _manifest.csv in the project folder."""
+        # Coerce to unicode then encode utf-8 — same trick as _export. Without
+        # this, hosts/URLs with non-ASCII chars crash with the "ascii codec"
+        # error on Jython 2.7 when format() merges str templates with unicode args.
+        def _u(x):
+            if isinstance(x, unicode):
+                return x
+            if isinstance(x, bytes):
+                return x.decode("utf-8", errors="replace")
+            return unicode(x)
+
+        def _csv_field(x):
+            # Minimal RFC-4180 escaping: wrap in quotes if the field has a
+            # comma, quote, or newline; double-up internal quotes.
+            s = _u(x)
+            if any(ch in s for ch in (u",", u'"', u"\n", u"\r")):
+                s = u'"' + s.replace(u'"', u'""') + u'"'
+            return s
+
         try:
             proj_dir = os.path.join(output_dir, _sanitize_path(project))
             if not os.path.exists(proj_dir):
@@ -902,19 +934,19 @@ class BurpExtender(IBurpExtender, IHttpListener, ITab):
                 rows = list(self.js_log)
 
             with open(manifest_path, "wb") as f:
-                f.write("index,timestamp,host,path,version,size_bytes,full_url,saved_as\n")
+                f.write(u"index,timestamp,host,path,version,size_bytes,full_url,saved_as\n".encode("utf-8"))
                 for i, r in enumerate(rows, 1):
-                    line = '{},{},{},{},{},{},{},{}\n'.format(
+                    line = u"{},{},{},{},{},{},{},{}\n".format(
                         i,
-                        r.get("timestamp", ""),
-                        r.get("host", ""),
-                        r.get("path", ""),
-                        r.get("version", ""),
-                        r.get("size", ""),
-                        r.get("full_url", ""),
-                        r.get("saved_as", ""),
+                        _csv_field(r.get("timestamp", "")),
+                        _csv_field(r.get("host", "")),
+                        _csv_field(r.get("path", "")),
+                        _csv_field(r.get("version", "")),
+                        _csv_field(r.get("size", "")),
+                        _csv_field(r.get("full_url", "")),
+                        _csv_field(r.get("saved_as", "")),
                     )
-                    f.write(line)
+                    f.write(line.encode("utf-8", errors="replace"))
 
         except Exception as e:
             self.stderr.println("[JS Exporter] _writeManifest: " + str(e))
